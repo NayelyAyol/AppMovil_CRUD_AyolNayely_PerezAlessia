@@ -12,7 +12,7 @@ class MongoDatabase {
   static DbCollection? _coleccion;
 
   static const String _connectionString =
-      'mongodb+srv://nayelyayol_db_user:g5tQhokyEhUfJkn1@crudcluster.nktoovj.mongodb.net/?appName=CrudCluster';
+      'mongodb+srv://alessiaperez_db_user:Patito123H@cluster0.9uajrxr.mongodb.net/clase_flutter?retryWrites=true&w=majority';
 
   static Future<void> connect() async {
     _db = await Db.create(_connectionString);
@@ -23,7 +23,9 @@ class MongoDatabase {
   static DbCollection get _col {
     final coleccion = _coleccion;
     if (coleccion == null) {
-      throw Exception('La base de datos no ha sido inicializada. Llama a MongoDatabase.connect() primero.');
+      throw Exception(
+        'La base de datos no ha sido inicializada. Llama a MongoDatabase.connect() primero.',
+      );
     }
     return coleccion;
   }
@@ -41,10 +43,7 @@ class MongoDatabase {
 
   /// UPDATE: actualiza un libro existente según su campo "id".
   static Future<void> updateItem(ItemColeccion item) async {
-    await _col.update(
-      where.eq('id', item.id),
-      item.toMap(),
-    );
+    await _col.update(where.eq('id', item.id), item.toMap());
   }
 
   /// DELETE: elimina un libro según su campo "id".
@@ -55,7 +54,9 @@ class MongoDatabase {
   /// Verifica si ya existe un libro con ese título (evita duplicados
   /// al guardar desde la API externa).
   static Future<bool> existeLibro(String titulo) async {
-    final Map<String, dynamic>? existente = await _col.findOne(where.eq('titulo', titulo));
+    final Map<String, dynamic>? existente = await _col.findOne(
+      where.eq('titulo', titulo),
+    );
     return existente != null;
   }
 }
