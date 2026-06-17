@@ -12,7 +12,7 @@ class MongoDatabase {
   static DbCollection? _coleccion;
 
   static const String _connectionString =
-      'mongodb+srv://alessiaperez_db_user:Patito123H@cluster0.9uajrxr.mongodb.net/clase_flutter?retryWrites=true&w=majority';
+      
 
   static Future<void> connect() async {
     _db = await Db.create(_connectionString);
