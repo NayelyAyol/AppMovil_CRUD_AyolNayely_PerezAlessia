@@ -7,13 +7,8 @@ import 'theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await MongoDatabase.connect();
-    print("Conectado a MongoDB");
-  } catch (e) {
-    print("Error al conectar MongoDB: $e");
-    print("La aplicación continuará sin base de datos");
-  }
+  await MongoDatabase.connect();
+  print("Conectado a MongoDB");
 
   runApp(const MyApp());
 }

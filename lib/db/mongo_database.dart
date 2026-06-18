@@ -1,6 +1,7 @@
 import 'package:mongo_dart/mongo_dart.dart';
 
 import '../models/item_coleccion.dart';
+import '../config/mongo_config.dart';
 
 /// Capa de acceso a MongoDB Atlas para la colección local de libros.
 ///
@@ -11,8 +12,7 @@ class MongoDatabase {
   static Db? _db;
   static DbCollection? _coleccion;
 
-  static const String _connectionString =
-      
+  static const String _connectionString = MongoConfig.connectionString;
 
   static Future<void> connect() async {
     _db = await Db.create(_connectionString);
