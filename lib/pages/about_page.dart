@@ -59,7 +59,7 @@ class AboutPage extends StatelessWidget {
           const SizedBox(height: 20),
           _seccion(
             'Integrantes',
-            'Nombre 1 - Código\nNombre 2 - Código',
+            'Nayely Ayol - Código\nAlessia Perez - Código',
             Icons.people,
           ),
           _seccion(

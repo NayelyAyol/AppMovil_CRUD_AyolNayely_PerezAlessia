@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 import '../db/mongo_database.dart';
 import '../models/item_coleccion.dart';
 
-/// Pantalla 3: Formulario.
-/// Crea o edita un libro de la colección local.
 class FormPage extends StatefulWidget {
   final ItemColeccion? item;
 
@@ -86,7 +85,11 @@ class _FormPageState extends State<FormPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.item == null ? 'Libro agregado a tu colección' : 'Libro actualizado'),
+          content: Text(
+            widget.item == null
+                ? 'Libro agregado a tu colección'
+                : 'Libro actualizado',
+          ),
         ),
       );
 
@@ -94,9 +97,9 @@ class _FormPageState extends State<FormPage> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al guardar: $e')));
     } finally {
       if (mounted) {
         setState(() => _guardando = false);
@@ -110,6 +113,8 @@ class _FormPageState extends State<FormPage> {
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
     IconData? icono,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -117,6 +122,7 @@ class _FormPageState extends State<FormPage> {
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: icono != null ? Icon(icono) : null,
@@ -124,6 +130,9 @@ class _FormPageState extends State<FormPage> {
         validator: (String? value) {
           if (value == null || value.trim().isEmpty) {
             return 'Campo obligatorio';
+          }
+          if (validator != null) {
+            return validator(value);
           }
           return null;
         },
@@ -136,9 +145,7 @@ class _FormPageState extends State<FormPage> {
     final bool editando = widget.item != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(editando ? 'Editar libro' : 'Nuevo libro'),
-      ),
+      appBar: AppBar(title: Text(editando ? 'Editar libro' : 'Nuevo libro')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
         child: Form(
@@ -151,14 +158,36 @@ class _FormPageState extends State<FormPage> {
               _campo(
                 precioCtrl,
                 'Precio',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 icono: Icons.attach_money,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
+                validator: (value) {
+                  final n = double.tryParse(value ?? '');
+                  if (n == null) {
+                    return 'Ingrese un número válido';
+                  }
+                  if (n < 0) {
+                    return 'El precio no puede ser negativo';
+                  }
+                  return null;
+                },
               ),
               _campo(
                 stockCtrl,
                 'Stock (ejemplares)',
                 keyboardType: TextInputType.number,
                 icono: Icons.inventory_2,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) {
+                  final n = int.tryParse(value ?? '');
+                  if (n == null) return 'Ingrese un entero válido';
+                  if (n < 0) return 'El stock no puede ser menor a 0';
+                  return null;
+                },
               ),
               _campo(imagenCtrl, 'URL de portada', icono: Icons.image),
               _campo(
