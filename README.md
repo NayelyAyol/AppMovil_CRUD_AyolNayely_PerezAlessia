@@ -350,6 +350,9 @@ build/app/outputs/flutter-apk/app-release.apk
 | --------------- | ------------ |
 |<img width="1080" height="2400" alt="1781852737500" src="https://github.com/user-attachments/assets/8d7c94c6-0da8-44f7-a68d-89d31e5689d4" />|<img width="1080" height="2400" alt="1781852737535" src="https://github.com/user-attachments/assets/6255e819-c511-4c3b-8bc8-9b99662490ec" />|
 
+|  Registro en Mongo Atlas   |
+| --------------- |
+|<img width="1600" height="899" alt="image" src="https://github.com/user-attachments/assets/02e342ff-5500-45d3-8a2d-f4cccf58bb1e" />|
 ---
 ## Link del video
 
