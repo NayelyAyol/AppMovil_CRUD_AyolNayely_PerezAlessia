@@ -351,7 +351,11 @@ build/app/outputs/flutter-apk/app-release.apk
 |<img width="1080" height="2400" alt="1781852737500" src="https://github.com/user-attachments/assets/8d7c94c6-0da8-44f7-a68d-89d31e5689d4" />|<img width="1080" height="2400" alt="1781852737535" src="https://github.com/user-attachments/assets/6255e819-c511-4c3b-8bc8-9b99662490ec" />|
 
 ---
+## Link del video
 
+- https://drive.google.com/drive/folders/1WVcDgWSXjyDeW_h-c3xysR3uhY_gViti?usp=drive_link
+
+---
 ## Resultados
 
 * Conexión exitosa con MongoDB Atlas.
