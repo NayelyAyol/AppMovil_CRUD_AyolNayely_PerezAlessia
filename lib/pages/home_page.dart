@@ -34,10 +34,18 @@ class HomePage extends StatelessWidget {
         ),
         subtitle: Text(subtitulo),
         trailing: const Icon(Icons.chevron_right, color: AppColors.vino),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => destino),
-        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => destino),
+          ).then((_) {
+            // Este bloque se ejecuta automáticamente al regresar a esta pantalla.
+            // Fuerza a reconstruir el HomePage para que el FutureBuilder vuelva a leer MongoDB.
+            if (context.mounted) {
+              (context as Element).markNeedsBuild();
+            }
+          });
+        },
       ),
     );
   }
@@ -60,8 +68,12 @@ class HomePage extends StatelessWidget {
         final List<ItemColeccion> items = snapshot.data!;
         final int total = items.length;
         final int stockTotal = items.fold<int>(0, (s, e) => s + e.stock);
-        final double promedio =
-            total == 0 ? 0 : items.fold<double>(0, (s, e) => s + e.precio) / total;
+
+        // Suma acumulada de todos los precios de los libros en la colección
+        final double valorTotalColeccion = items.fold<double>(
+          0,
+          (s, e) => s + e.precio,
+        );
 
         Widget dato(String valor, String etiqueta, IconData icono) {
           return Column(
@@ -88,7 +100,12 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 dato('$total', 'Libros', Icons.menu_book),
-                dato('\$${promedio.toStringAsFixed(2)}', 'Precio prom.', Icons.sell),
+                // Se reemplaza "Precio prom." por el "Valor total" acumulado de la colección
+                dato(
+                  '\$${valorTotalColeccion.toStringAsFixed(2)}',
+                  'Valor total',
+                  Icons.monetization_on,
+                ),
                 dato('$stockTotal', 'Stock total', Icons.inventory_2),
               ],
             ),
@@ -117,12 +134,17 @@ class HomePage extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.dorado, width: 3),
                       ),
-                      child: const Icon(Icons.auto_stories, size: 48, color: AppColors.crema),
+                      child: const Icon(
+                        Icons.auto_stories,
+                        size: 48,
+                        color: AppColors.crema,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Rincón Literario',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppColors.vino,
                           ),
@@ -130,7 +152,10 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 4),
                     const Text(
                       'tu pequeña librería de bolsillo',
-                      style: TextStyle(fontStyle: FontStyle.italic, color: AppColors.marronTexto),
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.marronTexto,
+                      ),
                     ),
                   ],
                 ),
@@ -140,7 +165,11 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 22),
               const Text(
                 'Explora',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.vino),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppColors.vino,
+                ),
               ),
               const SizedBox(height: 8),
               _opcion(

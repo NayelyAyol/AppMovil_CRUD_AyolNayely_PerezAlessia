@@ -19,7 +19,7 @@ class ApiExplorerPage extends StatefulWidget {
 
 class _ApiExplorerPageState extends State<ApiExplorerPage> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _buscadorCtrl = TextEditingController(text: 'romance');
+  final TextEditingController _buscadorCtrl = TextEditingController();
 
   final List<dynamic> _libros = [];
   int _page = 1;
@@ -33,6 +33,9 @@ class _ApiExplorerPageState extends State<ApiExplorerPage> {
     super.initState();
     _cargarMas();
 
+    // Registramos el listener para detectar en tiempo real cuando se borra el texto
+    _buscadorCtrl.addListener(_detectarTextoVacio);
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -43,9 +46,25 @@ class _ApiExplorerPageState extends State<ApiExplorerPage> {
 
   @override
   void dispose() {
+    // Es importante remover el listener y hacer el dispose correctamente
+    _buscadorCtrl.removeListener(_detectarTextoVacio);
     _scrollController.dispose();
     _buscadorCtrl.dispose();
     super.dispose();
+  }
+
+  /// Detecta si el usuario borró todo el texto de la barra de búsqueda
+  /// y restablece la lista general de libros automáticamente.
+  void _detectarTextoVacio() {
+    if (_buscadorCtrl.text.trim().isEmpty && _query != 'romance') {
+      setState(() {
+        _query = 'romance'; // Volvemos al término general por defecto
+        _libros.clear();
+        _page = 1;
+        _hayMas = true;
+      });
+      _cargarMas();
+    }
   }
 
   Future<void> _cargarMas() async {
@@ -116,7 +135,8 @@ class _ApiExplorerPageState extends State<ApiExplorerPage> {
       precio: 0,
       stock: 1,
       imagen: OpenLibraryService.obtenerPortada(libro),
-      descripcion: 'Primera publicación: ${libro['first_publish_year'] ?? 'N/D'}',
+      descripcion:
+          'Primera publicación: ${libro['first_publish_year'] ?? 'N/D'}',
       fuente: 'Open Library API',
     );
 
@@ -124,9 +144,9 @@ class _ApiExplorerPageState extends State<ApiExplorerPage> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Guardado en mi colección')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Guardado en mi colección')));
   }
 
   Widget _portada(String url) {
@@ -192,69 +212,87 @@ class _ApiExplorerPageState extends State<ApiExplorerPage> {
           ),
           Expanded(
             child: _libros.isEmpty && _cargando
-                ? const Center(child: CircularProgressIndicator(color: AppColors.vino))
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.vino),
+                  )
                 : _libros.isEmpty
-                    ? const Center(child: Text('Sin resultados, intenta otra búsqueda'))
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _libros.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == _libros.length) {
-                            return Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Center(
-                                child: _hayMas
-                                    ? const CircularProgressIndicator(color: AppColors.vino)
-                                    : const Text('No hay más resultados'),
-                              ),
-                            );
-                          }
+                ? const Center(
+                    child: Text('Sin resultados, intenta otra búsqueda'),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _libros.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == _libros.length) {
+                        return Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Center(
+                            child: _hayMas
+                                ? const CircularProgressIndicator(
+                                    color: AppColors.vino,
+                                  )
+                                : const Text('No hay más resultados'),
+                          ),
+                        );
+                      }
 
-                          final dynamic libro = _libros[index];
-                          final String portada = OpenLibraryService.obtenerPortada(libro);
+                      final dynamic libro = _libros[index];
+                      final String portada = OpenLibraryService.obtenerPortada(
+                        libro,
+                      );
 
-                          return Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _portada(portada),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          libro['title'] ?? 'Sin título',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          OpenLibraryService.obtenerAutor(libro),
-                                          style: const TextStyle(fontStyle: FontStyle.italic),
-                                        ),
-                                        Text('Año: ${libro['first_publish_year'] ?? 'N/D'}'),
-                                        const SizedBox(height: 8),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: FilledButton.icon(
-                                            onPressed: () => _guardarEnColeccion(libro),
-                                            icon: const Icon(Icons.bookmark_add, size: 18),
-                                            label: const Text('Guardar'),
-                                          ),
-                                        ),
-                                      ],
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _portada(portada),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      libro['title'] ?? 'Sin título',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      OpenLibraryService.obtenerAutor(libro),
+                                      style: const TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Año: ${libro['first_publish_year'] ?? 'N/D'}',
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: FilledButton.icon(
+                                        onPressed: () =>
+                                            _guardarEnColeccion(libro),
+                                        icon: const Icon(
+                                          Icons.bookmark_add,
+                                          size: 18,
+                                        ),
+                                        label: const Text('Guardar'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
