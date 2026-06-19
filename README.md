@@ -354,7 +354,10 @@ build/app/outputs/flutter-apk/app-release.apk
 ## Link del video
 
 - https://drive.google.com/drive/folders/1WVcDgWSXjyDeW_h-c3xysR3uhY_gViti?usp=drive_link
+---
+## APK
 
+- https://drive.google.com/drive/folders/1Q3ozdVD3Evp-gtxyfZDOws0_j_Ss54h9?usp=sharing
 ---
 ## Resultados
 
